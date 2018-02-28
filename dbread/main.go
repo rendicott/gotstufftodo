@@ -16,7 +16,9 @@ func readDynamoConfig() (tableName string, err error) {
 	configTable := os.Getenv("CONFIG_TABLE")
 	var attributesToGet []*string
 	setting := "setting"
+	value := "value"
 	attributesToGet = append(attributesToGet, &setting)
+	attributesToGet = append(attributesToGet, &value)
 	scanInput := dynamodb.ScanInput{AttributesToGet: attributesToGet,
 		TableName: &configTable}
 	results, err := dsvc.Scan(&scanInput)
@@ -25,10 +27,12 @@ func readDynamoConfig() (tableName string, err error) {
 	}
 	for item := range results.Items {
 		setting := results.Items[item]["setting"].S
-		log.Println(setting)
-		// if *setting == "table-name" {
-		// 	tableName = *results.Items[item]["value"].S
-		// }
+		log.Println(*setting)
+		if *setting == "table-name" {
+			tn := results.Items[item]["value"].S
+			log.Println(tn)
+			tableName = *tn
+		}
 	}
 	return tableName, err
 }
